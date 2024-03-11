@@ -12,13 +12,13 @@ func completer(d prompt.Document) []prompt.Suggest {
 
 	switch text := strings.TrimLeft(d.Text, " "); {
 	case strings.HasPrefix(text, "config "):
-		s, sub = completerSuggestConfig(sub[7:])
+		s, sub = complConfig(sub[7:])
 	case strings.HasPrefix(text, "info "):
-		s, sub = completerSuggestInfo(sub[5:])
+		s, sub = complInfo(sub[5:])
 	case strings.HasPrefix(text, "led "):
-		s, sub = completerSuggestLED(sub[4:])
+		s, sub = complLED(sub[4:])
 	case strings.HasPrefix(text, "motion "):
-		s, sub = completerSuggestMotion(sub[7:])
+		s, sub = complMotion(sub[7:])
 	default:
 		s = []prompt.Suggest{
 			{Text: "config"},
@@ -33,7 +33,7 @@ func completer(d prompt.Document) []prompt.Suggest {
 	return prompt.FilterHasPrefix(s, sub, true)
 }
 
-func completerSuggestConfig(text string) ([]prompt.Suggest, string) {
+func complConfig(text string) ([]prompt.Suggest, string) {
 	var s []prompt.Suggest
 
 	switch t := strings.TrimLeft(text, " "); {
@@ -64,7 +64,7 @@ func completerSuggestConfig(text string) ([]prompt.Suggest, string) {
 	return s, text
 }
 
-func completerSuggestInfo(text string) ([]prompt.Suggest, string) {
+func complInfo(text string) ([]prompt.Suggest, string) {
 	var s []prompt.Suggest
 
 	switch t := strings.TrimLeft(text, " "); {
@@ -82,7 +82,7 @@ func completerSuggestInfo(text string) ([]prompt.Suggest, string) {
 	return s, text
 }
 
-func completerSuggestLED(text string) ([]prompt.Suggest, string) {
+func complLED(text string) ([]prompt.Suggest, string) {
 	var s []prompt.Suggest
 
 	switch t := strings.TrimLeft(text, " "); {
@@ -100,7 +100,7 @@ func completerSuggestLED(text string) ([]prompt.Suggest, string) {
 	return s, text
 }
 
-func completerSuggestMotion(text string) ([]prompt.Suggest, string) {
+func complMotion(text string) ([]prompt.Suggest, string) {
 	var s []prompt.Suggest
 
 	switch t := strings.TrimLeft(text, " "); {
