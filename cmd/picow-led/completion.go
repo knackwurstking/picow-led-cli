@@ -8,33 +8,37 @@ import (
 
 func completer(d prompt.Document) []prompt.Suggest {
 	var s []prompt.Suggest
+	sub := strings.TrimLeft(d.Text, " ")
 
 	switch text := strings.TrimLeft(d.Text, " "); {
 	case strings.HasPrefix(text, "config "):
-		s = completerSuggestConfig(d.Text[7:])
+		s, sub = completerSuggestConfig(sub[7:])
 	case strings.HasPrefix(text, "info "):
-		s = completerSuggestInfo(d.Text[5:])
+		s, sub = completerSuggestInfo(sub[5:])
 	case strings.HasPrefix(text, "led "):
-		s = completerSuggestLED(d.Text[4:])
+		s, sub = completerSuggestLED(sub[4:])
 	case strings.HasPrefix(text, "motion "):
-		s = completerSuggestMotion(d.Text[7:])
+		s, sub = completerSuggestMotion(sub[7:])
 	default:
 		s = []prompt.Suggest{
 			{Text: "config"},
 			{Text: "info"},
 			{Text: "led"},
 			{Text: "motion"},
+			{Text: "exit"},
+			{Text: "quit"},
 		}
 	}
 
-	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
+	return prompt.FilterHasPrefix(s, sub, true)
 }
 
-func completerSuggestConfig(text string) []prompt.Suggest {
+func completerSuggestConfig(text string) ([]prompt.Suggest, string) {
 	var s []prompt.Suggest
 
 	switch t := strings.TrimLeft(text, " "); {
 	case strings.HasPrefix(t, "set "):
+		text = t[4:]
 		s = []prompt.Suggest{
 			{Text: "led"},
 			{Text: "motion"},
@@ -42,6 +46,7 @@ func completerSuggestConfig(text string) []prompt.Suggest {
 			{Text: "pwm-range"},
 		}
 	case strings.HasPrefix(t, "get "):
+		text = t[4:]
 		s = []prompt.Suggest{
 			{Text: "led"},
 			{Text: "motion"},
@@ -49,56 +54,66 @@ func completerSuggestConfig(text string) []prompt.Suggest {
 			{Text: "pwm-range"},
 		}
 	default:
+		text = t
 		s = []prompt.Suggest{
 			{Text: "set"},
 			{Text: "get"},
 		}
 	}
 
-	return s
+	return s, text
 }
 
-func completerSuggestInfo(text string) []prompt.Suggest {
+func completerSuggestInfo(text string) ([]prompt.Suggest, string) {
 	var s []prompt.Suggest
 
 	switch t := strings.TrimLeft(text, " "); {
 	case strings.HasPrefix(t, "set "):
+		text = t[4:]
 		s = []prompt.Suggest{}
 	case strings.HasPrefix(t, "get "):
+		text = t[4:]
 		s = []prompt.Suggest{}
 	default:
+		text = t
 		s = []prompt.Suggest{}
 	}
 
-	return s
+	return s, text
 }
 
-func completerSuggestLED(text string) []prompt.Suggest {
+func completerSuggestLED(text string) ([]prompt.Suggest, string) {
 	var s []prompt.Suggest
 
 	switch t := strings.TrimLeft(text, " "); {
 	case strings.HasPrefix(t, "set "):
+		text = t[4:]
 		s = []prompt.Suggest{}
 	case strings.HasPrefix(t, "get "):
+		text = t[4:]
 		s = []prompt.Suggest{}
 	default:
+		text = t
 		s = []prompt.Suggest{}
 	}
 
-	return s
+	return s, text
 }
 
-func completerSuggestMotion(text string) []prompt.Suggest {
+func completerSuggestMotion(text string) ([]prompt.Suggest, string) {
 	var s []prompt.Suggest
 
 	switch t := strings.TrimLeft(text, " "); {
 	case strings.HasPrefix(t, "set "):
+		text = t[4:]
 		s = []prompt.Suggest{}
 	case strings.HasPrefix(t, "get "):
+		text = t[4:]
 		s = []prompt.Suggest{}
 	default:
+		text = t
 		s = []prompt.Suggest{}
 	}
 
-	return s
+	return s, text
 }

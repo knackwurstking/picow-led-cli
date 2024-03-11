@@ -44,7 +44,7 @@ func main() {
 		)
 
 		switch strings.Trim(t, " ") {
-		case "exit", "quit", "q":
+		case "exit", "quit":
 			exit()
 		}
 
