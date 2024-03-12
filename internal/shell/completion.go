@@ -4,116 +4,48 @@ import (
 	"strings"
 
 	"github.com/c-bata/go-prompt"
+
+	"github.com/knackwurstking/picow-led/internal/command"
 )
 
 func completer(d prompt.Document) []prompt.Suggest {
-	var s []prompt.Suggest
 	sub := strings.TrimLeft(d.Text, " ")
+	s := []prompt.Suggest{
+		{Text: "config"},
+		{Text: "info"},
+		{Text: "led"},
+		{Text: "motion"},
+		{Text: "exit"},
+		{Text: "quit"},
+	}
 
-	switch text := strings.TrimLeft(d.Text, " "); {
-	case strings.HasPrefix(text, "config "):
-		s, sub = complConfig(sub[7:])
-	case strings.HasPrefix(text, "info "):
-		s, sub = complInfo(sub[5:])
-	case strings.HasPrefix(text, "led "):
-		s, sub = complLED(sub[4:])
-	case strings.HasPrefix(text, "motion "):
-		s, sub = complMotion(sub[7:])
-	default:
-		s = []prompt.Suggest{
-			{Text: "config"},
-			{Text: "info"},
-			{Text: "led"},
-			{Text: "motion"},
-			{Text: "exit"},
-			{Text: "quit"},
+	for group, groupData := range command.Data {
+		if strings.HasPrefix(sub, string(group)+" ") {
+			s, sub = complete(sub[len(string(group))+1:], groupData)
+			break
 		}
 	}
 
 	return prompt.FilterHasPrefix(s, sub, true)
 }
 
-func complConfig(text string) ([]prompt.Suggest, string) {
-	var s []prompt.Suggest
+func complete(sub string, groupData map[command.Type][]command.Command) ([]prompt.Suggest, string) {
+	suggestions := make([]prompt.Suggest, 0)
+	sub = strings.TrimLeft(sub, " ")
 
-	switch t := strings.TrimLeft(text, " "); {
-	case strings.HasPrefix(t, "set "):
-		text = t[4:]
-		s = []prompt.Suggest{
-			{Text: "led"},
-			{Text: "motion"},
-			{Text: "motion-timeout"},
-			{Text: "pwm-range"},
+	for commandType, commands := range groupData {
+		if !strings.HasPrefix(sub, string(commandType)+" ") {
+			suggestions = append(suggestions, prompt.Suggest{Text: string(commandType)})
+			continue
 		}
-	case strings.HasPrefix(t, "get "):
-		text = t[4:]
-		s = []prompt.Suggest{
-			{Text: "led"},
-			{Text: "motion"},
-			{Text: "motion-timeout"},
-			{Text: "pwm-range"},
+
+		suggestions = make([]prompt.Suggest, 0)
+		for _, _command := range commands {
+			suggestions = append(suggestions, prompt.Suggest{Text: string(_command)})
 		}
-	default:
-		text = t
-		s = []prompt.Suggest{
-			{Text: "set"},
-			{Text: "get"},
-		}
+
+		return suggestions, sub[len(commandType)+1:]
 	}
 
-	return s, text
-}
-
-func complInfo(text string) ([]prompt.Suggest, string) {
-	var s []prompt.Suggest
-
-	switch t := strings.TrimLeft(text, " "); {
-	case strings.HasPrefix(t, "set "):
-		text = t[4:]
-		s = []prompt.Suggest{}
-	case strings.HasPrefix(t, "get "):
-		text = t[4:]
-		s = []prompt.Suggest{}
-	default:
-		text = t
-		s = []prompt.Suggest{}
-	}
-
-	return s, text
-}
-
-func complLED(text string) ([]prompt.Suggest, string) {
-	var s []prompt.Suggest
-
-	switch t := strings.TrimLeft(text, " "); {
-	case strings.HasPrefix(t, "set "):
-		text = t[4:]
-		s = []prompt.Suggest{}
-	case strings.HasPrefix(t, "get "):
-		text = t[4:]
-		s = []prompt.Suggest{}
-	default:
-		text = t
-		s = []prompt.Suggest{}
-	}
-
-	return s, text
-}
-
-func complMotion(text string) ([]prompt.Suggest, string) {
-	var s []prompt.Suggest
-
-	switch t := strings.TrimLeft(text, " "); {
-	case strings.HasPrefix(t, "set "):
-		text = t[4:]
-		s = []prompt.Suggest{}
-	case strings.HasPrefix(t, "get "):
-		text = t[4:]
-		s = []prompt.Suggest{}
-	default:
-		text = t
-		s = []prompt.Suggest{}
-	}
-
-	return s, text
+	return suggestions, sub
 }
