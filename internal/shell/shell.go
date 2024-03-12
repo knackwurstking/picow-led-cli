@@ -1,7 +1,6 @@
 package shell
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -37,17 +36,17 @@ func Run() {
 	saveTermState()
 
 	for {
-		t := prompt.Input(
+		userCommand := prompt.Input(
 			"[picow] ",
 			completer,
 			prompt.OptionPrefixTextColor(prompt.Blue),
 		)
 
-		switch strings.Trim(t, " ") {
+		switch strings.Trim(userCommand, " ") {
 		case "exit", "quit":
 			exit()
 		}
 
-		fmt.Printf("Run command: %s\n", t)
+		// TODO: handle/run `userCommand`, print error if command not found, ...
 	}
 }
