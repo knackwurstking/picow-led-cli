@@ -10,20 +10,16 @@ import (
 
 func completer(d prompt.Document) []prompt.Suggest {
 	sub := strings.TrimLeft(d.Text, " ")
-	s := []prompt.Suggest{
-		{Text: "config"},
-		{Text: "info"},
-		{Text: "led"},
-		{Text: "motion"},
-		{Text: "exit"},
-		{Text: "quit"},
-	}
+	s := make([]prompt.Suggest, 0)
 
 	for group, groupData := range command.Data {
-		if strings.HasPrefix(sub, string(group)+" ") {
-			s, sub = complete(sub[len(string(group))+1:], groupData)
-			break
+		if !strings.HasPrefix(sub, string(group)+" ") {
+			s = append(s, prompt.Suggest{Text: string(group)})
+			continue
 		}
+
+		s, sub = complete(sub[len(string(group))+1:], groupData)
+		break
 	}
 
 	return prompt.FilterHasPrefix(s, sub, true)
