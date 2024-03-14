@@ -3,64 +3,60 @@ package picowcommand
 import "github.com/knackwurstking/picow-led/picow"
 
 const (
-	GroupConfig Group = Group("config")
-	GroupInfo   Group = Group("info")
-	GroupLED    Group = Group("led")
-	GroupMotion Group = Group("motion")
+	GroupConfig = picow.CommandGroupConfig
+	GroupInfo   = picow.CommandGroupInfo
+	GroupLED    = picow.CommandGroupLED
+	GroupMotion = picow.CommandGroupMotion
 
-	TypeSet   Type = Type("set")
-	TypeGet   Type = Type("get")
-	TypeEvent Type = Type("event")
+	TypeSet   = picow.CommandTypeSet
+	TypeGet   = picow.CommandTypeGet
+	TypeEvent = picow.CommandTypeEvent
 )
 
 var (
-	Tree map[Group]map[Type][]Name = map[Group]map[Type][]Name{
+	Tree = map[picow.CommandGroup]map[picow.CommandType][]picow.Command{
 		GroupConfig: {
 			TypeSet: {
-				Name("led"),
-				Name("motion"),
-				Name("motion-timeout"),
-				Name("pwm-range"),
+				picow.Command("led"),
+				picow.Command("motion"),
+				picow.Command("motion-timeout"),
+				picow.Command("pwm-range"),
 			},
 			TypeGet: {
-				Name("led"),
-				Name("motion"),
-				Name("motion-timeout"),
-				Name("pwm-range"),
+				picow.Command("led"),
+				picow.Command("motion"),
+				picow.Command("motion-timeout"),
+				picow.Command("pwm-range"),
 			},
 		},
 		GroupInfo: {
 			TypeGet: {
-				Name("temp"),
-				Name("disk-usage"),
-				Name("version"),
+				picow.Command("temp"),
+				picow.Command("disk-usage"),
+				picow.Command("version"),
 			},
 		},
 		GroupLED: {
 			TypeSet: {
-				Name("duty"),
+				picow.Command("duty"),
 			},
 			TypeGet: {
-				Name("duty"),
+				picow.Command("duty"),
 			},
 		},
 		GroupMotion: {
 			TypeEvent: {
-				Name("start"),
-				Name("stop"),
+				picow.Command("start"),
+				picow.Command("stop"),
 			},
 		},
 	}
 )
 
-type Group string
-type Type string
-type Name string
-
 type Command struct {
-	group Group
-	_type Type
-	name  Name
+	group picow.CommandGroup
+	_type picow.CommandType
+	name  picow.Command
 }
 
 func (c *Command) Run(args ...string) (*picow.Response, error) {
@@ -72,8 +68,8 @@ func (c *Command) Run(args ...string) (*picow.Response, error) {
 
 func New(g string, t string, n string) Command {
 	return Command{
-		group: Group(g),
-		_type: Type(t),
-		name:  Name(n),
+		group: picow.CommandGroup(g),
+		_type: picow.CommandType(t),
+		name:  picow.Command(n),
 	}
 }

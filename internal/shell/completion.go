@@ -6,6 +6,7 @@ import (
 	"github.com/c-bata/go-prompt"
 
 	"github.com/knackwurstking/picow-led/internal/picowcommand"
+	"github.com/knackwurstking/picow-led/picow"
 )
 
 func completer(d prompt.Document) []prompt.Suggest {
@@ -25,7 +26,7 @@ func completer(d prompt.Document) []prompt.Suggest {
 	return prompt.FilterHasPrefix(s, sub, true)
 }
 
-func complete(sub string, groupData map[picowcommand.Type][]picowcommand.Name) ([]prompt.Suggest, string) {
+func complete(sub string, groupData map[picow.CommandType][]picow.Command) ([]prompt.Suggest, string) {
 	suggestions := make([]prompt.Suggest, 0)
 	sub = strings.TrimLeft(sub, " ")
 
