@@ -1,6 +1,6 @@
-package structs
+package picow
 
-type PicoWResponse struct {
+type Response struct {
 	ID    int     `json:"id"`
 	Error *string `json:"error"`
 	Data  any     `json:"data"`

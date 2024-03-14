@@ -1,6 +1,6 @@
 package picowcommand
 
-import "github.com/knackwurstking/picow-led/internal/structs"
+import "github.com/knackwurstking/picow-led/picow"
 
 const (
 	GroupConfig Group = Group("config")
@@ -63,11 +63,11 @@ type Command struct {
 	name  Name
 }
 
-func (c *Command) Run(args ...string) (*structs.PicoWResponse, error) {
+func (c *Command) Run(args ...string) (*picow.Response, error) {
 	// TODO: any - Response type, package: net?
 	// ...
 
-	return &structs.PicoWResponse{}, nil // placeholder return
+	return &picow.Response{}, nil // placeholder return
 }
 
 func New(g string, t string, n string) Command {
