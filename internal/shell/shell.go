@@ -7,7 +7,7 @@ import (
 	"github.com/c-bata/go-prompt"
 	"golang.org/x/term"
 
-	"github.com/knackwurstking/picow-led/internal/command"
+	"github.com/knackwurstking/picow-led/internal/picowcommand"
 )
 
 var (
@@ -77,11 +77,20 @@ func Run() {
 			}
 		}
 
-		cmd := command.New(commandGroup, commandType, commandName)
-		if resp, err := cmd.Run(args...); err != nil {
+		cmd := picowcommand.New(commandGroup, commandType, commandName)
+		resp, err := cmd.Run(args...)
+		if err != nil {
 			// TODO: handle error
-		} else {
-			// TODO: print response back to client (stdout)
+
+			continue
 		}
+
+		if resp.Error != nil {
+			// TODO: handle error
+
+			continue
+		}
+
+		// TODO: print response data back to client
 	}
 }
