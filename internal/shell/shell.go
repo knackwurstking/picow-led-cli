@@ -78,7 +78,7 @@ func Run() {
 		}
 
 		cmd := command.New(commandGroup, commandType, commandName)
-		if err := cmd.Run(args...); err != nil {
+		if resp, err := cmd.Run(args...); err != nil {
 			// TODO: handle error
 		} else {
 			// TODO: print response back to client (stdout)
