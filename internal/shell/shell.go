@@ -6,6 +6,8 @@ import (
 
 	"github.com/c-bata/go-prompt"
 	"golang.org/x/term"
+
+	"github.com/knackwurstking/picow-led/internal/command"
 )
 
 var (
@@ -47,6 +49,39 @@ func Run() {
 			exit()
 		}
 
-		// TODO: handle/run `userCommand`, print error if command not found, ...
+		cs := make([]string, 0) // command split
+		for _, p := range strings.Split(userCommand, " ") {
+			if p == "" {
+				continue
+			}
+			cs = append(cs, p)
+		}
+
+		var (
+			commandGroup string
+			commandType  string
+			commandName  string
+			args         []string
+		)
+
+		for i, c := range cs {
+			switch i {
+			case 0:
+				commandGroup = c
+			case 1:
+				commandType = c
+			case 2:
+				commandName = c
+			default:
+				args = cs[i:]
+			}
+		}
+
+		cmd := command.New(commandGroup, commandType, commandName)
+		if err := cmd.Run(args...); err != nil {
+			// TODO: handle error
+		} else {
+			// TODO: print response back to client (stdout)
+		}
 	}
 }

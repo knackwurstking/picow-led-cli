@@ -12,7 +12,7 @@ func completer(d prompt.Document) []prompt.Suggest {
 	sub := strings.TrimLeft(d.Text, " ")
 	s := make([]prompt.Suggest, 0)
 
-	for group, groupData := range command.Data {
+	for group, groupData := range command.Tree {
 		if !strings.HasPrefix(sub, string(group)+" ") {
 			s = append(s, prompt.Suggest{Text: string(group)})
 			continue
@@ -25,7 +25,7 @@ func completer(d prompt.Document) []prompt.Suggest {
 	return prompt.FilterHasPrefix(s, sub, true)
 }
 
-func complete(sub string, groupData map[command.Type][]command.Command) ([]prompt.Suggest, string) {
+func complete(sub string, groupData map[command.Type][]command.Name) ([]prompt.Suggest, string) {
 	suggestions := make([]prompt.Suggest, 0)
 	sub = strings.TrimLeft(sub, " ")
 

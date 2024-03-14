@@ -12,40 +12,40 @@ const (
 )
 
 var (
-	Data map[Group]map[Type][]Command = map[Group]map[Type][]Command{
+	Tree map[Group]map[Type][]Name = map[Group]map[Type][]Name{
 		GroupConfig: {
 			TypeSet: {
-				NewCommand(GroupConfig, TypeSet, "led"),
-				NewCommand(GroupConfig, TypeSet, "motion"),
-				NewCommand(GroupConfig, TypeSet, "motion-timeout"),
-				NewCommand(GroupConfig, TypeSet, "pwm-range"),
+				Name("led"),
+				Name("motion"),
+				Name("motion-timeout"),
+				Name("pwm-range"),
 			},
 			TypeGet: {
-				NewCommand(GroupConfig, TypeGet, "led"),
-				NewCommand(GroupConfig, TypeGet, "motion"),
-				NewCommand(GroupConfig, TypeGet, "motion-timeout"),
-				NewCommand(GroupConfig, TypeGet, "pwm-range"),
+				Name("led"),
+				Name("motion"),
+				Name("motion-timeout"),
+				Name("pwm-range"),
 			},
 		},
 		GroupInfo: {
 			TypeGet: {
-				NewCommand(GroupInfo, TypeGet, "temp"),
-				NewCommand(GroupInfo, TypeGet, "disk-usage"),
-				NewCommand(GroupInfo, TypeGet, "version"),
+				Name("temp"),
+				Name("disk-usage"),
+				Name("version"),
 			},
 		},
 		GroupLED: {
 			TypeSet: {
-				NewCommand(GroupLED, TypeSet, "duty"),
+				Name("duty"),
 			},
 			TypeGet: {
-				NewCommand(GroupLED, TypeGet, "duty"),
+				Name("duty"),
 			},
 		},
 		GroupMotion: {
 			TypeEvent: {
-				NewCommand(GroupMotion, TypeEvent, "start"),
-				NewCommand(GroupMotion, TypeEvent, "stop"),
+				Name("start"),
+				Name("stop"),
 			},
 		},
 	}
@@ -53,27 +53,24 @@ var (
 
 type Group string
 type Type string
+type Name string
 
 type Command struct {
-	Group Group
-	Type  Type
-	Name  string
+	group Group
+	_type Type
+	name  Name
 }
 
-func NewCommand(group Group, _type Type, command string) Command {
-	return Command{
-		Group: group,
-		Type:  _type,
-		Name:  command,
-	}
-}
-
-func (c Command) String() string {
-	return c.Name
-}
-
-func (c Command) Run() error {
-	// TODO: run command from group of type...
+func (c *Command) Run(args ...string) error {
+	// ...
 
 	return nil
+}
+
+func New(g string, t string, n string) Command {
+	return Command{
+		group: Group(g),
+		_type: Type(t),
+		name:  Name(n),
+	}
 }
