@@ -1,6 +1,8 @@
 package picow
 
 const (
+	DefaultPort = 3000
+
 	CommandGroupConfig = CommandGroup("config")
 	CommandGroupInfo   = CommandGroup("info")
 	CommandGroupLED    = CommandGroup("led")

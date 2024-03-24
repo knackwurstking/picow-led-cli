@@ -1,6 +1,10 @@
 package picowcommand
 
-import "github.com/knackwurstking/picow-led/picow"
+import (
+	"fmt"
+
+	"github.com/knackwurstking/picow-led/picow"
+)
 
 const (
 	GroupConfig = picow.CommandGroupConfig
@@ -54,22 +58,25 @@ var (
 )
 
 type Command struct {
-	group picow.CommandGroup
-	_type picow.CommandType
-	name  picow.Command
+	Group picow.CommandGroup
+	Type  picow.CommandType
+	Name  picow.Command
 }
 
-func (c *Command) Run(args ...string) (*picow.Response, error) {
-	// TODO: any - Response type, package: net?
-	// ...
+func (c *Command) Run(net *picow.Net, args ...string) (*picow.Response, error) {
+	if net != nil {
+		return nil, fmt.Errorf("missing server object to connect to")
+	}
+
+	// TODO: send data to picow device and await response
 
 	return &picow.Response{}, nil // placeholder return
 }
 
 func New(g string, t string, n string) Command {
 	return Command{
-		group: picow.CommandGroup(g),
-		_type: picow.CommandType(t),
-		name:  picow.Command(n),
+		Group: picow.CommandGroup(g),
+		Type:  picow.CommandType(t),
+		Name:  picow.Command(n),
 	}
 }

@@ -1,13 +1,16 @@
 package shell
 
 import (
+	"fmt"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/c-bata/go-prompt"
 	"golang.org/x/term"
 
 	"github.com/knackwurstking/picow-led/internal/picowcommand"
+	"github.com/knackwurstking/picow-led/picow"
 )
 
 var (
@@ -33,7 +36,7 @@ func exit() {
 	os.Exit(0)
 }
 
-func Run() {
+func Run(picowDevices []*picow.Net) {
 	defer restoreTermState()
 	saveTermState()
 
@@ -78,19 +81,29 @@ func Run() {
 		}
 
 		cmd := picowcommand.New(commandGroup, commandType, commandName)
-		resp, err := cmd.Run(args...)
-		if err != nil {
-			// TODO: handle error
 
-			continue
+		wg := sync.WaitGroup{}
+		for _, device := range picowDevices {
+			go runCommand(&wg, device, cmd, args...)
 		}
-
-		if resp.Error != nil {
-			// TODO: handle error
-
-			continue
-		}
-
-		// TODO: print response data back to client
+		wg.Wait()
 	}
+}
+
+func runCommand(wg *sync.WaitGroup, device *picow.Net, cmd picowcommand.Command, args ...string) {
+	defer wg.Done()
+	wg.Add(1)
+
+	resp, err := cmd.Run(device, args...)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "err: %s %s %s: %s\n", cmd.Group, cmd.Type, cmd.Name, err)
+		return
+	}
+
+	if resp.Error != nil {
+		fmt.Fprintf(os.Stderr, "err: response: %s\n", *resp.Error)
+		return
+	}
+
+	// TODO: check server response for data to print
 }
