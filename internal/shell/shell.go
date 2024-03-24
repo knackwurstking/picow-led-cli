@@ -15,6 +15,7 @@ import (
 
 var (
 	termState *term.State
+	mutex     = sync.Mutex{}
 )
 
 func saveTermState() {
@@ -41,11 +42,13 @@ func Run(picowDevices []*picow.Net) {
 	saveTermState()
 
 	for {
+		mutex.Lock()
 		userCommand := prompt.Input(
 			"[picow] ",
 			completer,
 			prompt.OptionPrefixTextColor(prompt.Blue),
 		)
+		mutex.Unlock()
 
 		switch strings.Trim(userCommand, " ") {
 		case "exit", "quit":
@@ -84,6 +87,7 @@ func Run(picowDevices []*picow.Net) {
 
 		wg := sync.WaitGroup{}
 		for _, device := range picowDevices {
+			wg.Add(1)
 			go runCommand(&wg, device, cmd, args...)
 		}
 		wg.Wait()
@@ -92,16 +96,19 @@ func Run(picowDevices []*picow.Net) {
 
 func runCommand(wg *sync.WaitGroup, device *picow.Net, cmd picowcommand.Command, args ...string) {
 	defer wg.Done()
-	wg.Add(1)
 
 	resp, err := cmd.Run(device, args...)
 	if err != nil {
+		mutex.Lock()
 		fmt.Fprintf(os.Stderr, "err: %s %s %s: %s\n", cmd.Group, cmd.Type, cmd.Name, err)
+		mutex.Unlock()
 		return
 	}
 
 	if resp.Error != nil {
-		fmt.Fprintf(os.Stderr, "err: response: %s\n", *resp.Error)
+		mutex.Lock()
+		fmt.Fprintf(os.Stderr, "nerr: response: %s\n", *resp.Error)
+		mutex.Unlock()
 		return
 	}
 

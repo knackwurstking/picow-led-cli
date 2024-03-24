@@ -11,7 +11,10 @@ import (
 
 func completer(d prompt.Document) []prompt.Suggest {
 	sub := strings.TrimLeft(d.Text, " ")
-	s := make([]prompt.Suggest, 0)
+	s := []prompt.Suggest{
+		{Text: "exit"},
+		{Text: "quit"},
+	}
 
 	for group, groupData := range picowcommand.Tree {
 		if !strings.HasPrefix(sub, string(group)+" ") {
