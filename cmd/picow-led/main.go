@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	picowDevices []*picow.Net = []*picow.Net{
-		picow.NewNet("127.0.0.1", picow.DefaultPort),
+	picowDevices []picow.Server = []picow.Server{
+		{Host: "127.0.0.1", Port: picow.DefaultPort},
 	}
 )
 
 func main() {
-	shell.Run(picowDevices)
+	shell.Run(picowDevices...)
 }

@@ -1,8 +1,6 @@
 package picowcommand
 
 import (
-	"fmt"
-
 	"github.com/knackwurstking/picow-led/picow"
 )
 
@@ -63,11 +61,7 @@ type Command struct {
 	Name  picow.Command
 }
 
-func (c *Command) Run(net *picow.Net, args ...string) (*picow.Response, error) {
-	if net != nil {
-		return nil, fmt.Errorf("missing server object to connect to")
-	}
-
+func (c *Command) Run(server picow.Server, args ...string) (*picow.Response, error) {
 	// TODO: send data to picow device and await response
 
 	return &picow.Response{}, nil // placeholder return

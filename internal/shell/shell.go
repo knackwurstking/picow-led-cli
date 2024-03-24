@@ -37,9 +37,11 @@ func exit() {
 	os.Exit(0)
 }
 
-func Run(picowDevices []*picow.Net) {
+func Run(servers ...picow.Server) {
 	defer restoreTermState()
 	saveTermState()
+
+	// TODO: set and start write handlers for all servers (always print response before the current prompt if possible)
 
 	for {
 		mutex.Lock()
@@ -86,18 +88,18 @@ func Run(picowDevices []*picow.Net) {
 		cmd := picowcommand.New(commandGroup, commandType, commandName)
 
 		wg := sync.WaitGroup{}
-		for _, device := range picowDevices {
+		for _, server := range servers {
 			wg.Add(1)
-			go runCommand(&wg, device, cmd, args...)
+			go runCommand(&wg, server, cmd, args...)
 		}
 		wg.Wait()
 	}
 }
 
-func runCommand(wg *sync.WaitGroup, device *picow.Net, cmd picowcommand.Command, args ...string) {
+func runCommand(wg *sync.WaitGroup, server picow.Server, cmd picowcommand.Command, args ...string) {
 	defer wg.Done()
 
-	resp, err := cmd.Run(device, args...)
+	resp, err := cmd.Run(server, args...)
 	if err != nil {
 		mutex.Lock()
 		fmt.Fprintf(os.Stderr, "err: %s %s %s: %s\n", cmd.Group, cmd.Type, cmd.Name, err)
