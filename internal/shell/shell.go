@@ -41,7 +41,13 @@ func Run(servers ...picow.Server) {
 	defer restoreTermState()
 	saveTermState()
 
-	// TODO: set and start write handlers for all servers (always print response before the current prompt if possible)
+	readHandlerWG := sync.WaitGroup{}
+	defer func() {
+		readHandlerWG.Wait()
+	}()
+
+	readHandlerWG.Add(1)
+	read(&readHandlerWG, servers...)
 
 	for {
 		mutex.Lock()
@@ -90,29 +96,25 @@ func Run(servers ...picow.Server) {
 		wg := sync.WaitGroup{}
 		for _, server := range servers {
 			wg.Add(1)
-			go runCommand(&wg, server, cmd, args...)
+			go write(&wg, server, cmd, args...)
 		}
 		wg.Wait()
 	}
 }
 
-func runCommand(wg *sync.WaitGroup, server picow.Server, cmd picowcommand.Command, args ...string) {
+func read(wg *sync.WaitGroup, servers ...picow.Server) {
 	defer wg.Done()
 
-	resp, err := cmd.Run(server, args...)
+	// TODO: read from pico devices and write to stdout/stderr
+}
+
+func write(wg *sync.WaitGroup, server picow.Server, cmd picowcommand.Command, args ...string) {
+	defer wg.Done()
+
+	err := cmd.Write(server.GetWriter(), args...)
 	if err != nil {
 		mutex.Lock()
 		fmt.Fprintf(os.Stderr, "err: %s %s %s: %s\n", cmd.Group, cmd.Type, cmd.Name, err)
 		mutex.Unlock()
-		return
 	}
-
-	if resp.Error != nil {
-		mutex.Lock()
-		fmt.Fprintf(os.Stderr, "nerr: response: %s\n", *resp.Error)
-		mutex.Unlock()
-		return
-	}
-
-	// TODO: check server response for data to print
 }

@@ -1,6 +1,8 @@
 package picowcommand
 
 import (
+	"fmt"
+
 	"github.com/knackwurstking/picow-led/picow"
 )
 
@@ -61,10 +63,10 @@ type Command struct {
 	Name  picow.Command
 }
 
-func (c *Command) Run(server picow.Server, args ...string) (*picow.Response, error) {
+func (c *Command) Write(server *picow.Writer, args ...string) error {
 	// TODO: send data to picow device and await response
 
-	return &picow.Response{}, nil // placeholder return
+	return fmt.Errorf("work in progress") // placeholder return
 }
 
 func New(g string, t string, n string) Command {

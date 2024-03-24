@@ -4,20 +4,28 @@ import "fmt"
 
 // TODO: socket communication stuff here
 
-type reader struct {
+type Reader struct {
 }
 
-type writer struct {
+type Writer struct {
 }
 
 type Server struct {
 	Host string
 	Port int
 
-	reader reader
-	writer writer
+	reader Reader
+	writer Writer
 
 	readHandler func()
+}
+
+func (s *Server) GetReader() *Reader {
+	return &s.reader
+}
+
+func (s *Server) GetWriter() *Writer {
+	return &s.writer
 }
 
 func (s *Server) SetReadHandler(fn func()) error {
