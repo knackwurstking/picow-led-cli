@@ -15,7 +15,7 @@ import (
 
 var (
 	termState *term.State
-	mutex     = sync.Mutex{}
+	readMutex = sync.Mutex{}
 )
 
 func saveTermState() {
@@ -50,13 +50,13 @@ func Run(servers ...picow.Server) {
 	read(&readHandlerWG, servers...)
 
 	for {
-		mutex.Lock()
+		readMutex.Lock()
 		userCommand := prompt.Input(
 			"[picow] ",
 			completer,
 			prompt.OptionPrefixTextColor(prompt.Blue),
 		)
-		mutex.Unlock()
+		readMutex.Unlock()
 
 		switch strings.Trim(userCommand, " ") {
 		case "exit", "quit":
@@ -113,8 +113,8 @@ func write(wg *sync.WaitGroup, server picow.Server, cmd picowcommand.Command, ar
 
 	err := cmd.Write(server.GetWriter(), args...)
 	if err != nil {
-		mutex.Lock()
+		readMutex.Lock()
 		fmt.Fprintf(os.Stderr, "err: %s %s %s: %s\n", cmd.Group, cmd.Type, cmd.Name, err)
-		mutex.Unlock()
+		readMutex.Unlock()
 	}
 }
