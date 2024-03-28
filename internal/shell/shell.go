@@ -105,6 +105,36 @@ func Run(servers ...picow.Server) {
 func read(wg *sync.WaitGroup, servers ...picow.Server) {
 	defer wg.Done()
 
+	wg2 := sync.WaitGroup{}
+	for _, server := range servers {
+		wg2.Add(1)
+		go func(wg *sync.WaitGroup, server picow.Server) {
+			defer wg.Done()
+
+			reader := server.GetReader()
+			response, err := reader.ReadResponse()
+			if err != nil {
+				readMutex.Lock()
+				fmt.Fprintf(os.Stderr, "err: %s\n", err.Error())
+				readMutex.Unlock()
+				return
+			}
+
+			if response.Error != nil {
+				if *response.Error != "" {
+					readMutex.Lock()
+					fmt.Fprintf(os.Stderr, "err: %s\n", *response.Error)
+					readMutex.Unlock()
+					return
+				}
+			}
+
+			// TODO: check for data and ID, then print data to stdout
+		}(&wg2, server)
+	}
+
+	wg.Wait()
+
 	// TODO: read from pico devices and write to stdout/stderr
 }
 
