@@ -11,7 +11,7 @@ type Reader struct {
 	conn net.Conn
 }
 
-func (r *Reader) ReadResponse() (*Response, error) {
+func (r *Reader) Read() (*Response, error) {
 	// ...
 
 	return nil, fmt.Errorf("under construction")
