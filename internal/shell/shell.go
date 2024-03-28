@@ -50,13 +50,13 @@ func Run(servers ...picow.Server) {
 	read(&readHandlerWG, servers...)
 
 	for {
-		readMutex.Lock()
+		//readMutex.Lock()
 		userCommand := prompt.Input(
 			"[picow] ",
 			completer,
 			prompt.OptionPrefixTextColor(prompt.Blue),
 		)
-		readMutex.Unlock()
+		//readMutex.Unlock()
 
 		switch strings.Trim(userCommand, " ") {
 		case "exit", "quit":
@@ -114,6 +114,7 @@ func read(wg *sync.WaitGroup, servers ...picow.Server) {
 			reader := server.GetReader()
 			response, err := reader.Read()
 			if err != nil {
+				// TODO: output to stderr above the current input prompt
 				readMutex.Lock()
 				fmt.Fprintf(os.Stderr, "err: %s\n", err.Error())
 				readMutex.Unlock()
@@ -122,6 +123,7 @@ func read(wg *sync.WaitGroup, servers ...picow.Server) {
 
 			if response.Error != nil {
 				if *response.Error != "" {
+					// TODO: output to stderr above the current input prompt
 					readMutex.Lock()
 					fmt.Fprintf(os.Stderr, "err: %s\n", *response.Error)
 					readMutex.Unlock()
@@ -129,7 +131,16 @@ func read(wg *sync.WaitGroup, servers ...picow.Server) {
 				}
 			}
 
-			// TODO: check for data and ID, then print data to stdout
+			if response.ID == picow.IDNoResponse {
+				return
+			}
+
+			if response.ID == picow.IDMotion {
+				// TODO: motion event triggered
+				return
+			}
+
+			// TODO: output data to stdout
 		}(&wg2, server)
 	}
 
