@@ -21,4 +21,5 @@ type ID int
 // TODO:
 //  - Request package
 //  - Response package
-//  - Server struct for communication with a picow device (does not handle multiple devices)
+//  - Server struct for communication with a picow device (does not handle
+//    multiple devices)
