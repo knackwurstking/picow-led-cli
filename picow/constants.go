@@ -11,6 +11,11 @@ const (
 	CommandTypeGet   = CommandType("get")
 	CommandTypeSet   = CommandType("set")
 	CommandTypeEvent = CommandType("event")
+
+	IDMotion     = -2
+	IDNoResponse = -1
+
+	ServerEndByte = byte('\n')
 )
 
 type CommandGroup string
