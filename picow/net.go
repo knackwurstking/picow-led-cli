@@ -1,10 +1,20 @@
 package picow
 
-import "fmt"
+import (
+	"fmt"
+	"net"
+)
 
 // TODO: socket communication stuff here
 
 type Reader struct {
+	conn net.Conn
+}
+
+func (r *Reader) ReadResponse() (*Response, error) {
+	// ...
+
+	return nil, fmt.Errorf("under construction")
 }
 
 type Writer struct {
