@@ -112,7 +112,7 @@ func read(wg *sync.WaitGroup, servers ...picow.Server) {
 			defer wg.Done()
 
 			reader := server.GetReader()
-			response, err := reader.ReadResponse()
+			response, err := reader.Read()
 			if err != nil {
 				readMutex.Lock()
 				fmt.Fprintf(os.Stderr, "err: %s\n", err.Error())
