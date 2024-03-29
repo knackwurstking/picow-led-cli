@@ -78,13 +78,44 @@ func (s *Server) Connect() error {
 }
 
 func (s *Server) Read() (*Response, error) {
+	// check connection to the picow device
 	if s.addr == "" {
 		return nil, fmt.Errorf("not connected to server, run connect method first")
 	}
 
-	// TODO: read data from client ()non blocking, until endbyte)
+	// read data from client
+	data := make([]byte, 0)
+	chunk := make([]byte, 1)
+	for {
+		// read byte for byte and check for error
+		n, err := s.conn.Read(chunk)
+		if err != nil {
+			return nil, err
+		}
 
-	return nil, fmt.Errorf("under construction")
+		// break on empty data
+		if n == 0 {
+			break
+		}
+
+		// checking for endbyte
+		if chunk[0] == DefaultEndByte {
+			break
+		}
+
+		// append chunk to data
+		data = append(data, chunk...)
+	}
+
+	// check data
+	if len(data) == 0 {
+		return nil, fmt.Errorf("no data")
+	}
+
+	resp := Response{}
+	json.Unmarshal(data, &resp)
+
+	return &Response{}, nil
 }
 
 func (s *Server) Write(req Request) error {
