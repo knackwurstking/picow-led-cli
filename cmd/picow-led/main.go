@@ -38,8 +38,7 @@ func main() {
 	// parse args
 	req, err := parseArgs(flags.Args)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "err: parsing args failed %s", err)
-		os.Exit(ErrorArgs)
+		log.Fatal(ErrorArgs, "parsing args failed %s", err)
 	}
 
 	// send request to picow devices
