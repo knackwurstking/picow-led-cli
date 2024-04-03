@@ -23,10 +23,16 @@ const (
 	DefaultEndByte = byte('\n')
 )
 
+// Group of command
 type Group string
+
+// Type of command
 type Type string
+
+// ID of command
 type ID int
 
+// Request object for the picow device
 type Request struct {
 	ID      int           `json:"id"`
 	Group   Group         `json:"group"`
@@ -35,12 +41,14 @@ type Request struct {
 	Args    []interface{} `json:"args"`
 }
 
+// Response object the picow device will respond with
 type Response struct {
 	ID    int    `json:"id"`
 	Error string `json:"error"`
 	Data  any    `json:"data"`
 }
 
+// Server will handle all communication to a picow device
 type Server struct {
 	host string
 	port int
@@ -49,6 +57,7 @@ type Server struct {
 	conn net.Conn
 }
 
+// NewServer will create a new Server object
 func NewServer(host string, port int) *Server {
 	return &Server{
 		host: host,
@@ -56,14 +65,17 @@ func NewServer(host string, port int) *Server {
 	}
 }
 
+// GetHost of the current picow device
 func (s *Server) GetHost() string {
 	return s.host
 }
 
+// GetPort of the current picow device
 func (s *Server) GetPort() int {
 	return s.port
 }
 
+// Connect to picow device socket, uses "tcp"
 func (s *Server) Connect() error {
 	addr := fmt.Sprintf("%s:%d", s.host, s.port)
 	c, err := net.Dial("tcp", addr)
@@ -77,7 +89,8 @@ func (s *Server) Connect() error {
 	return nil
 }
 
-func (s *Server) Read() (*Response, error) {
+// GetResponse from the picow device
+func (s *Server) GetResponse() (*Response, error) {
 	// check connection to the picow device
 	if s.addr == "" {
 		return nil, fmt.Errorf("not connected to server, run connect method first")
@@ -113,12 +126,15 @@ func (s *Server) Read() (*Response, error) {
 	}
 
 	resp := Response{}
-	json.Unmarshal(data, &resp)
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, err
+	}
 
 	return &Response{}, nil
 }
 
-func (s *Server) Write(req Request) error {
+// Send a request to the picow
+func (s *Server) Send(req Request) error {
 	// type checking request.args
 	if len(req.Args) > 0 {
 		switch req.Args[0].(type) {
