@@ -23,6 +23,21 @@ const (
 	DefaultEndByte = byte('\n')
 )
 
+var (
+	Groups = []Group{
+		GroupConfig,
+		GroupInfo,
+		GroupLED,
+		GroupMotion,
+	}
+
+	Types = []Type{
+		TypeSet,
+		TypeGet,
+		TypeEvent,
+	}
+)
+
 // Group of command
 type Group string
 
@@ -34,11 +49,11 @@ type ID int
 
 // Request object for the picow device
 type Request struct {
-	ID      int           `json:"id"`
-	Group   Group         `json:"group"`
-	Type    Type          `json:"type"`
-	Command string        `json:"command"`
-	Args    []interface{} `json:"args"`
+	ID      int      `json:"id"`
+	Group   Group    `json:"group"`
+	Type    Type     `json:"type"`
+	Command string   `json:"command"`
+	Args    []string `json:"args"`
 }
 
 // Response object the picow device will respond with
@@ -135,16 +150,6 @@ func (s *Server) GetResponse() (*Response, error) {
 
 // Send a request to the picow
 func (s *Server) Send(req Request) error {
-	// type checking request.args
-	if len(req.Args) > 0 {
-		switch req.Args[0].(type) {
-		case string:
-		case int:
-		default:
-			return fmt.Errorf("request args list have to be from type string or int")
-		}
-	}
-
 	// check connection to picow device
 	if s.addr == "" {
 		return fmt.Errorf("not connected to server, run connect method first")

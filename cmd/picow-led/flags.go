@@ -32,16 +32,17 @@ func (a *Addr) Set(value string) error {
 
 // Flags holds all flag values
 type Flags struct {
-	Addr  flag.Value // Addr containing the picow server addresses
-	Debug bool       // Debug enables debugging messages
-	Args  []string   // Args containing all commandline args besides these already parsed
+	Addr  Addr     // Addr containing the picow server addresses
+	Debug bool     // Debug enables debugging messages
+	Args  []string // Args containing all commandline args besides these already parsed
+	// TODO: Add `-id` flag to set a custom id
 }
 
 func readFlags() *Flags {
-	var addr flag.Value = &Addr{}
-	var debug bool
+	addr := Addr{}
+	debug := false
 
-	flag.Var(addr, "addr", "picow device address (ip[:port] or hostname[:port])")
+	flag.Var(&addr, "addr", "picow device address (ip[:port] or hostname[:port])")
 	flag.BoolVar(&debug, "debug", debug, "enable debug messages")
 	flag.Parse()
 

@@ -13,6 +13,7 @@ NOTE:
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/knackwurstking/picow-led/internal/log"
 	"github.com/knackwurstking/picow-led/picow"
@@ -34,21 +35,70 @@ func main() {
 	log.EnableDebug = flags.Debug
 	log.Debug("%+v\n", flags)
 
-	// TODO: support for running commands on multiple devices
-
+	// parse args
 	req, err := parseArgs(flags.Args)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s", err)
+		fmt.Fprintf(os.Stderr, "err: parsing args failed %s", err)
 		os.Exit(ErrorArgs)
 	}
 
-	// TODO: create requests per picow address, create a copy of the returned `req` object
+	// send request to picow devices
+	wg := sync.WaitGroup{}
+	for _, addr := range flags.Addr {
+		wg.Add(1)
+		go func(addr string, wg *sync.WaitGroup) {
+			defer wg.Done()
+			// TODO: send request to server
+			// ...
+		}(addr, &wg)
+	}
+
+	// start read response handler
+	// TODO: read response from server (only if id is not -1)
+	// ...
+
+	wg.Wait()
+
+	// check and output error, or data in json format
+	// TODO: print out results
 
 	os.Exit(ErrorUnderConstruction)
 }
 
 func parseArgs(args []string) (req *picow.Request, err error) {
-	// TODO: parse args and return the request object
+	if len(args) < 3 {
+		return req, fmt.Errorf("wrong args: <group> <command-type> <command> [<args> ...]")
+	}
 
-	return
+	group := picow.Group("")
+	for _, g := range picow.Groups {
+		if g == picow.Group(args[0]) {
+			group = g
+			break
+		}
+	}
+	if group == "" {
+		return req, fmt.Errorf("group not exists: %s", group)
+	}
+
+	_type := picow.Type("")
+	for _, t := range picow.Types {
+		if t == picow.Type(args[1]) {
+			_type = t
+			break
+		}
+	}
+	if _type == "" {
+		return req, fmt.Errorf("command type not exists: %s", _type)
+	}
+
+	req = &picow.Request{
+		ID:      0,
+		Group:   picow.Group(args[0]),
+		Type:    picow.Type(args[1]),
+		Command: args[2],
+		Args:    make([]string, 0),
+	}
+
+	return req, err
 }
