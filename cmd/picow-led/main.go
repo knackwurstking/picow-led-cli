@@ -11,14 +11,18 @@ NOTE:
 */
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/knackwurstking/picow-led/internal/log"
+	"github.com/knackwurstking/picow-led/picow"
 )
 
 const (
 	// ErrorGeneric - every error not categorized
 	ErrorGeneric = 1
+	// ErrorArgs - invalid args given (non optional args)
+	ErrorArgs = 2
 	// ErrorInternal - something went wrong, this is a dev problem :)
 	ErrorInternal = 10
 	// ErrorUnderConstruction - feature not ready yet
@@ -31,8 +35,20 @@ func main() {
 	log.Debug("%+v\n", flags)
 
 	// TODO: support for running commands on multiple devices
-	// TODO: init server structs with flags data and run commands
-	//       (id, group, type, command, args)
+
+	req, err := parseArgs(flags.Args)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s", err)
+		os.Exit(ErrorArgs)
+	}
+
+	// TODO: create requests per picow address, create a copy of the returned `req` object
 
 	os.Exit(ErrorUnderConstruction)
+}
+
+func parseArgs(args []string) (req *picow.Request, err error) {
+	// TODO: parse args and return the request object
+
+	return
 }
