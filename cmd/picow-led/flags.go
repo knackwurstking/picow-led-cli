@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 
@@ -20,14 +19,9 @@ func (a Addr) String() string {
 
 // Set adds a new server
 func (a *Addr) Set(value string) error {
-	fmt.Println(value)
-	matched, err := regexp.MatchString("^.+:[0-9]+$", value)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "err: reqular expression failed: %s", err.Error())
-		os.Exit(ErrorInternal)
-	}
-
+	matched, _ := regexp.MatchString("^.+:[0-9]+$", value)
 	if !matched {
+		// no match means we have to add the default port here
 		value = fmt.Sprintf("%s:%d", strings.TrimRight(value, ":"), picow.DefaultPort)
 	}
 
@@ -38,18 +32,22 @@ func (a *Addr) Set(value string) error {
 
 // Flags holds all flag values
 type Flags struct {
-	Addr flag.Value // Addr containing the picow server addresses
-	Args []string   // Args containing all commandline args besides these already parsed
+	Addr  flag.Value // Addr containing the picow server addresses
+	Debug bool       // Debug enables debugging messages
+	Args  []string   // Args containing all commandline args besides these already parsed
 }
 
 func readFlags() *Flags {
 	var addr flag.Value = &Addr{}
+	var debug bool
 
 	flag.Var(addr, "addr", "picow device address (ip[:port] or hostname[:port])")
+	flag.BoolVar(&debug, "debug", debug, "enable debug messages")
 	flag.Parse()
 
 	return &Flags{
-		Addr: addr,
-		Args: flag.Args(),
+		Addr:  addr,
+		Debug: debug,
+		Args:  flag.Args(),
 	}
 }

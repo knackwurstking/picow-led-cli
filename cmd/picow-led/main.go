@@ -27,6 +27,7 @@ const (
 
 func main() {
 	flags := readFlags()
+	log.EnableDebug = flags.Debug
 	log.Debug("%+v\n", flags)
 
 	// TODO: support for running commands on multiple devices
