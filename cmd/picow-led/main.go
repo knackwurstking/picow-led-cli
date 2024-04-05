@@ -99,11 +99,11 @@ func getRequestFromArgs(args []string) (req *picow.Request) {
 	return req
 }
 
-func runCommand(subArgs *FlagsRun, request *picow.Request) {
+func runCommand(subArgs *FlagsSubCMDRun, request *picow.Request) {
 	os.Exit(ErrorUnderConstruction)
 }
 
-func onEvent(subArgs *FlagsOn) {
+func onEvent(subArgs *FlagsSubCMDOn) {
 	// TODO: get request object from flags
 
 	os.Exit(ErrorUnderConstruction)

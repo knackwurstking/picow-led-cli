@@ -18,13 +18,13 @@ const (
 type SubCMD string
 
 // FlagsRun subcommand flags
-type FlagsRun struct {
+type FlagsSubCMDRun struct {
 	ID   int      // ID changes the default command id (the motion id is not allowed)
 	Args []string // Args containing all commandline args besides these already parsed
 }
 
 // FlagsOn subcommand flags
-type FlagsOn struct {
+type FlagsSubCMDOn struct {
 	StartMotion bool     // StartMotion auto start motion sensor if set to true
 	Args        []string // Args containing all commandline args besides these already parsed
 }
@@ -91,9 +91,9 @@ func (flags *Flags) SplitSubs() (subsArgs [][]string, err error) {
 	return subsArgs, nil
 }
 
-func (*Flags) ReadSubCMDRun(args []string) (runFlags *FlagsRun, err error) {
+func (*Flags) ReadSubCMDRun(args []string) (runFlags *FlagsSubCMDRun, err error) {
 	cmd := flag.NewFlagSet("run", flag.ExitOnError)
-	runFlags = &FlagsRun{}
+	runFlags = &FlagsSubCMDRun{}
 
 	cmd.IntVar(&runFlags.ID, "id", runFlags.ID, "changes the default id in use")
 
@@ -106,9 +106,9 @@ func (*Flags) ReadSubCMDRun(args []string) (runFlags *FlagsRun, err error) {
 	return runFlags, err
 }
 
-func (*Flags) ReadSubCMDOn(args []string) (onFlags *FlagsOn, err error) {
+func (*Flags) ReadSubCMDOn(args []string) (onFlags *FlagsSubCMDOn, err error) {
 	cmd := flag.NewFlagSet("on", flag.ExitOnError)
-	onFlags = &FlagsOn{}
+	onFlags = &FlagsSubCMDOn{}
 
 	cmd.BoolVar(&onFlags.StartMotion, "start-motion", onFlags.StartMotion, "start motion sensor handling on the pico")
 
