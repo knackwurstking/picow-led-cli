@@ -99,6 +99,10 @@ func (*Flags) ReadSubRun(args []string) (runFlags *FlagsRun, err error) {
 
 	err = cmd.Parse(args)
 	runFlags.Args = cmd.Args()
+	if runFlags.ID == int(picow.IDMotionEvent) && err == nil {
+		err = fmt.Errorf("id \"%d\" not allowed!", picow.IDMotionEvent)
+	}
+
 	return runFlags, err
 }
 
