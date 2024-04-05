@@ -31,30 +31,42 @@ const (
 )
 
 func main() {
-	flags := readFlags()
-	log.EnableDebug = flags.Debug
-	log.Debug("%+v\n", flags)
-
-	// parse args
-	req, err := parseArgs(flags.Args)
+	flags := NewFlags()
+	subsArgs, err := flags.Read().SplitSubs()
 	if err != nil {
-		log.Fatal(ErrorArgs, "parsing args failed %s", err)
+		log.Fatalf(ErrorArgs, "Pasrsing flags failed: %s", err)
 	}
 
-	// send request to picow devices
+	log.EnableDebug = flags.Debug
+	log.Debugf("%+v\n", flags)
+
 	wg := sync.WaitGroup{}
-	for _, addr := range flags.Addr {
-		wg.Add(1)
-		go func(addr string, wg *sync.WaitGroup) {
-			defer wg.Done()
-			// TODO: send request to server
-			// ...
-		}(addr, &wg)
+	for _, subArgs := range subsArgs {
+		// TODO: parse args for sub
+
+		// TODO: run command in a goroutine, for each address (this should replace the old section after this for loop)
 	}
 
-	// start read response handler
-	// TODO: read response from server (only if id is not -1)
-	// ...
+	//// parse args
+	//req, err := parseArgs(flags.Args) // TODO: remove this
+	//if err != nil {
+	//	log.Fatalf(ErrorArgs, "Parsing args failed %s", err)
+	//}
+
+	//// send request to picow devices
+	//wg := sync.WaitGroup{}
+	//for _, addr := range flags.Addr {
+	//	wg.Add(1)
+	//	go func(addr string, wg *sync.WaitGroup) {
+	//		defer wg.Done()
+	//		// TODO: send request to server
+	//		// ...
+	//	}(addr, &wg)
+	//}
+
+	//// start read response handler
+	//// TODO: read response from server (only if id is not -1)
+	//// ...
 
 	wg.Wait()
 
