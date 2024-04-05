@@ -40,15 +40,15 @@ func main() {
 
 	for _, subArgs := range subsArgs {
 		// parse args for sub
-		switch Sub(subArgs[0]) {
-		case SubRun:
-			subFlags, err := flags.ReadSubRun(subArgs[1:])
+		switch SubCMD(subArgs[0]) {
+		case SubCMDRun:
+			subFlags, err := flags.ReadSubCMDRun(subArgs[1:])
 			if err != nil {
 				log.Fatalf(ErrorArgs, "Parse \"%s\" args failed: %s", subArgs[0], err.Error())
 			}
 			runCommand(subFlags, getRequestFromArgs(subFlags.Args))
-		case SubOn:
-			subFlags, err := flags.ReadSubOn(subArgs[1:])
+		case SubCMDOn:
+			subFlags, err := flags.ReadSubCMDOn(subArgs[1:])
 			if err != nil {
 				log.Fatalf(ErrorArgs, "Parse \"%s\" args failed: %s", subArgs[0], err.Error())
 			}

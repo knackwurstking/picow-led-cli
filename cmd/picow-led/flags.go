@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	SubRun = Sub("run")
-	SubOn  = Sub("on")
+	SubCMDRun = SubCMD("run")
+	SubCMDOn  = SubCMD("on")
 )
 
 // Sub defines subcommands
-type Sub string
+type SubCMD string
 
 // FlagsRun subcommand flags
 type FlagsRun struct {
@@ -78,7 +78,7 @@ func (flags *Flags) SplitSubs() (subsArgs [][]string, err error) {
 	subsArgs = make([][]string, 0)
 
 	for _, arg := range flags.Args {
-		if Sub(arg) == SubRun {
+		if SubCMD(arg) == SubCMDRun {
 			subsArgs = append(subsArgs, []string{arg})
 		}
 
@@ -91,7 +91,7 @@ func (flags *Flags) SplitSubs() (subsArgs [][]string, err error) {
 	return subsArgs, nil
 }
 
-func (*Flags) ReadSubRun(args []string) (runFlags *FlagsRun, err error) {
+func (*Flags) ReadSubCMDRun(args []string) (runFlags *FlagsRun, err error) {
 	cmd := flag.NewFlagSet("run", flag.ExitOnError)
 	runFlags = &FlagsRun{}
 
@@ -106,7 +106,7 @@ func (*Flags) ReadSubRun(args []string) (runFlags *FlagsRun, err error) {
 	return runFlags, err
 }
 
-func (*Flags) ReadSubOn(args []string) (onFlags *FlagsOn, err error) {
+func (*Flags) ReadSubCMDOn(args []string) (onFlags *FlagsOn, err error) {
 	cmd := flag.NewFlagSet("on", flag.ExitOnError)
 	onFlags = &FlagsOn{}
 
