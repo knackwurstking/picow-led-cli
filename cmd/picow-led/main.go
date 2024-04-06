@@ -46,15 +46,13 @@ func main() {
 			if err != nil {
 				log.Fatalf(ErrorArgs, "Parse \"%s\" args failed: %s", subArgs[0], err.Error())
 			}
-			// TODO: run command for each address in `flags.Addr` in a goroutine (use sync.WaitGroup)
-			runCommand(subFlags, getRequestFromArgs(subFlags.Args))
+			runCommand(flags.Addr, subFlags, getRequestFromArgs(subFlags.Args))
 		case SubCMDOn:
 			subFlags, err := flags.ReadSubCMDOn(subArgs[1:])
 			if err != nil {
 				log.Fatalf(ErrorArgs, "Parse \"%s\" args failed: %s", subArgs[0], err.Error())
 			}
-			// TODO: run command for each address in `flags.Addr` in a goroutine (use sync.WaitGroup)
-			onEvent(subFlags)
+			onEvent(flags.Addr, subFlags)
 		default:
 			log.Fatalf(ErrorArgs, "Ooops, subcommand \"%s\" not found!", subArgs[0])
 		}
@@ -101,13 +99,13 @@ func getRequestFromArgs(args []string) (req *picow.Request) {
 	return req
 }
 
-func runCommand(subArgs *FlagsSubCMDRun, request *picow.Request) {
+func runCommand(addr Addr, subArgs *FlagsSubCMDRun, request *picow.Request) {
 	// TODO: run command / send request to server and print out the response
 
 	os.Exit(ErrorUnderConstruction)
 }
 
-func onEvent(subArgs *FlagsSubCMDOn) {
+func onEvent(addr Addr, subArgs *FlagsSubCMDOn) {
 	// TODO: get request object from flags
 
 	// TODO: run command: start event, check response for error
