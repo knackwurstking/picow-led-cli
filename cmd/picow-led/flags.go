@@ -74,8 +74,8 @@ func (flags *Flags) Read() *Flags {
 	return flags
 }
 
-func (flags *Flags) SplitSubs() (subsArgs [][]string, err error) {
-	subsArgs = make([][]string, 0)
+func (flags *Flags) SplitSubs() ([][]string, error) {
+	subsArgs := make([][]string, 0)
 
 	for _, arg := range flags.Args {
 		if SubCMD(arg) == SubCMDRun {
@@ -91,13 +91,13 @@ func (flags *Flags) SplitSubs() (subsArgs [][]string, err error) {
 	return subsArgs, nil
 }
 
-func (*Flags) ReadSubCMDRun(args []string) (runFlags *FlagsSubCMDRun, err error) {
+func (*Flags) ReadSubCMDRun(args []string) (*FlagsSubCMDRun, error) {
 	cmd := flag.NewFlagSet("run", flag.ExitOnError)
-	runFlags = &FlagsSubCMDRun{}
+	runFlags := &FlagsSubCMDRun{}
 
 	cmd.IntVar(&runFlags.ID, "id", runFlags.ID, "changes the default id in use")
 
-	err = cmd.Parse(args)
+	err := cmd.Parse(args)
 	runFlags.Args = cmd.Args()
 	if runFlags.ID == int(picow.IDMotionEvent) && err == nil {
 		err = fmt.Errorf("id \"%d\" not allowed!", picow.IDMotionEvent)
@@ -106,13 +106,13 @@ func (*Flags) ReadSubCMDRun(args []string) (runFlags *FlagsSubCMDRun, err error)
 	return runFlags, err
 }
 
-func (*Flags) ReadSubCMDOn(args []string) (onFlags *FlagsSubCMDOn, err error) {
+func (*Flags) ReadSubCMDOn(args []string) (*FlagsSubCMDOn, error) {
 	cmd := flag.NewFlagSet("on", flag.ExitOnError)
-	onFlags = &FlagsSubCMDOn{}
+	onFlags := &FlagsSubCMDOn{}
 
 	cmd.BoolVar(&onFlags.StartMotion, "start-motion", onFlags.StartMotion, "start motion sensor handling on the pico")
 
-	err = cmd.Parse(args)
+	err := cmd.Parse(args)
 	onFlags.Args = cmd.Args()
 	return onFlags, err
 }
