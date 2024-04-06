@@ -12,6 +12,7 @@ NOTE:
 
 import (
 	"os"
+	"sync"
 
 	"github.com/knackwurstking/picow-led/internal/log"
 	"github.com/knackwurstking/picow-led/picow"
@@ -99,17 +100,25 @@ func getRequestFromArgs(args []string) (req *picow.Request) {
 	return req
 }
 
-func runCommand(addr Addr, subArgs *FlagsSubCMDRun, request *picow.Request) {
+func runCommand(addr Addr, subArgs *FlagsSubCMDRun, request *picow.Request) *sync.WaitGroup {
+	wg := sync.WaitGroup{}
+	defer wg.Done()
 	// TODO: run command / send request to server and print out the response
 
 	os.Exit(ErrorUnderConstruction)
+
+	return &wg
 }
 
-func onEvent(addr Addr, subArgs *FlagsSubCMDOn) {
+func onEvent(addr Addr, subArgs *FlagsSubCMDOn) *sync.WaitGroup {
+	wg := sync.WaitGroup{}
+	defer wg.Done()
 	// TODO: get request object from flags
 
 	// TODO: run command: start event, check response for error
 	// TODO: and wait for event before return
 
 	os.Exit(ErrorUnderConstruction)
+
+	return &wg
 }
