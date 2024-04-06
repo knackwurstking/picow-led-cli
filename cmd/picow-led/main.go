@@ -100,11 +100,16 @@ func getRequestFromArgs(args []string) (req *picow.Request) {
 }
 
 func runCommand(subArgs *FlagsSubCMDRun, request *picow.Request) {
+	// TODO: run command / send request to server and print out the response
+
 	os.Exit(ErrorUnderConstruction)
 }
 
 func onEvent(subArgs *FlagsSubCMDOn) {
 	// TODO: get request object from flags
+
+	// TODO: run command: start event, check response for error
+	// TODO: and wait for event before return
 
 	os.Exit(ErrorUnderConstruction)
 }
