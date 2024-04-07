@@ -68,6 +68,7 @@ func NewFlags() *Flags {
 func (flags *Flags) Read() *Flags {
 	flag.Var(&flags.Addr, "addr", "picow device address (ip[:port] or hostname[:port])")
 	flag.BoolVar(&flags.Debug, "debug", flags.Debug, "enable debug messages")
+	// TODO: Add flag for loop all given commands `-loop`
 
 	flag.Parse()
 	flags.Args = flag.Args()
@@ -116,8 +117,24 @@ func (*Flags) ReadSubCMDOn(args []string) (*FlagsSubCMDOn, error) {
 
 	err := cmd.Parse(args)
 
-	// TODO: check args for <event>
-	onFlags.Args = cmd.Args()
+	args = cmd.Args()
+
+	// check args length
+	if len(args) > 1 {
+		return onFlags, fmt.Errorf("too many events, only on allowed")
+	} else if len(args) < 1 {
+		return onFlags, fmt.Errorf("missing event")
+	}
+
+	// check <event>
+	for _, e := range picow.Events {
+		if e == args[0] {
+			onFlags.Event = args[0]
+		}
+	}
+	if onFlags.Event == "" {
+		return onFlags, fmt.Errorf("unknown event \"%s\"", onFlags.Event)
+	}
 
 	return onFlags, err
 }

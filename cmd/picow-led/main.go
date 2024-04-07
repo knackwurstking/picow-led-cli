@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"sync"
 
@@ -20,6 +21,10 @@ const (
 	ErrorServerError = 15
 	// ErrorUnderConstruction - feature not ready yet
 	ErrorUnderConstruction = 100
+)
+
+var (
+	serverCache = make([]*picow.Server, 0)
 )
 
 func main() {
@@ -60,21 +65,29 @@ func RunCommand(addr Addr, flags *FlagsSubCMDRun, request *picow.Request) *sync.
 	defer wg.Done()
 
 	request.ID = flags.ID
-	for _, pico := range addr {
-		log.Debugf("run command for \"%s\"", pico)
+	for _, a := range addr {
+		log.Debugf("run command for \"%s\"", a)
 
 		wg.Add(1)
-		go handleRequest(pico, request, flags.PrettyPrint, &wg)
+		func(a string, wg *sync.WaitGroup) {
+			defer wg.Done()
+
+			// TODO: handle connection to server and pass to handleRequest call
+			// TODO: get server from the serverCache, or create new
+			if err := handleRequest(a, request, flags.PrettyPrint); err != nil {
+				log.Errorf("handle request to \"%s\" failed: %s", a, err.Error())
+			}
+		}(a, &wg)
 	}
 
 	return &wg
 }
 
-func OnEvent(addr Addr, flags *FlagsSubCMDOn) *sync.WaitGroup {
+func OnEvent(addr Addr, flags *FlagsSubCMDOn) {
 	wg := sync.WaitGroup{}
-	defer wg.Done()
 
 	if flags.StartMotion {
+		// TODO: Only start once? (in case of -loop is set, see main function)
 		request := &picow.Request{
 			ID:      int(picow.IDNoResponse),
 			Group:   picow.GroupMotion,
@@ -83,57 +96,59 @@ func OnEvent(addr Addr, flags *FlagsSubCMDOn) *sync.WaitGroup {
 			Args:    make([]string, 0),
 		}
 
-		// TODO: send request to server and continue
+		for _, a := range addr {
+			wg.Add(1)
+			go func(a string, wg *sync.WaitGroup) {
+				defer wg.Done()
+
+				// TODO: handle connection to server and pass to handleRequest call
+				// TODO: get server from the serverCache, or create new
+				if err := handleRequest(a, request, false); err != nil {
+					log.Errorf("handle request to \"%s\" failed: %s", a, err.Error())
+				}
+			}(a, &wg)
+		}
 	}
 
-	// TODO: check if -start-motion flags is set, run command `motion event start` first if true
-	// ...
-
-	// TODO: run command: start event, check response for error
-	// TODO: and wait for event before return
+	// TODO: wait for a motion event, than return (no goroutine, blocking)
 	// ...
 
 	os.Exit(ErrorUnderConstruction)
-	return &wg
+	wg.Wait()
 }
 
-func handleRequest(pico string, request *picow.Request, prettyResponse bool, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	server := picow.NewServer(pico)
+func handleRequest(server *picow.Server, request *picow.Request, prettyResponse bool) error {
+	// TODO: this could be a problem, i'm not closing existing connections so there is no need to reconnect every time
+	server := picow.NewServer(addr)
 	if err := server.Connect(); err != nil {
-		log.Errorf("Connecting to \"%s\" failed: %s", server.GetAddr(), err.Error())
-		return
+		return fmt.Errorf("connection failed: %s", err.Error())
 	}
 
 	err := server.Send(request)
 	if err != nil {
-		log.Errorf("Send request to \"%s\" failed: %s", server.GetAddr(), err.Error())
-		return
+		return fmt.Errorf("request failed: %s", err.Error())
 	}
 
 	if request.ID == int(picow.IDNoResponse) {
-		return
+		return nil
 	}
 
 	resp, err := server.GetResponse()
 	if err != nil {
-		log.Errorf("Get response from \"%s\" failed: %s", server.GetAddr(), err.Error())
-		return
+		return fmt.Errorf("get response from \"%s\" failed: %s", server.GetAddr(), err.Error())
 	}
 
 	if resp.Error != "" {
 		if resp.ID != 0 {
-			log.Errorf("ID %d: %s: %s", resp.ID, server.GetAddr(), resp.Error)
+			err = fmt.Errorf("id %d: %s: %s", resp.ID, server.GetAddr(), resp.Error)
 		} else {
-			log.Errorf("%s: %s", server.GetAddr(), resp.ID, resp.Error)
+			err = fmt.Errorf("%s: %s", server.GetAddr(), resp.Error)
 		}
-		return
+		return err
 	}
 
 	if resp.Data != nil {
 		var data []byte
-		var err error
 		if prettyResponse {
 			data, err = json.MarshalIndent(resp.Data, "", "    ")
 		} else {
@@ -146,6 +161,8 @@ func handleRequest(pico string, request *picow.Request, prettyResponse bool, wg 
 
 		log.Log("%s", string(data))
 	}
+
+	return nil
 }
 
 func getRequestFromArgs(args []string) (req *picow.Request) {
