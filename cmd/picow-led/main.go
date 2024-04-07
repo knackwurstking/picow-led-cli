@@ -64,7 +64,7 @@ func RunCommand(addr Addr, flags *FlagsSubCMDRun, request *picow.Request) *sync.
 		log.Debugf("run command for \"%s\"", pico)
 
 		wg.Add(1)
-		go sendRequest(pico, request, flags.PrettyPrint, &wg)
+		go handleRequest(pico, request, flags.PrettyPrint, &wg)
 	}
 
 	return &wg
@@ -88,7 +88,7 @@ func OnEvent(addr Addr, flags *FlagsSubCMDOn) *sync.WaitGroup {
 	return &wg
 }
 
-func sendRequest(pico string, request *picow.Request, prettyResponse bool, wg *sync.WaitGroup) {
+func handleRequest(pico string, request *picow.Request, prettyResponse bool, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	server := picow.NewServer(pico)
