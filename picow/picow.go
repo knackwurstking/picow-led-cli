@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -65,41 +67,53 @@ type Response struct {
 
 // Server will handle all communication to a picow device
 type Server struct {
-	host string
-	port int
-
-	addr string
-	conn net.Conn
+	addr       string
+	conn       net.Conn
+	isConected bool
 }
 
 // NewServer will create a new Server object
-func NewServer(host string, port int) *Server {
+func NewServer(addr string) *Server {
 	return &Server{
-		host: host,
-		port: port,
+		addr: addr,
 	}
 }
 
 // GetHost of the current picow device
 func (s *Server) GetHost() string {
-	return s.host
+	return strings.Split(s.addr, ":")[0]
 }
 
-// GetPort of the current picow device
-func (s *Server) GetPort() int {
-	return s.port
+// GetPort of the current picow device, returns zero on an error
+func (s *Server) GetPort() (int, error) {
+	as := strings.Split(s.addr, ":")
+	if len(as) != 2 {
+		return 0, fmt.Errorf(
+			"something is wrong with the server address: \"%s\"",
+			s.addr,
+		)
+	}
+
+	return strconv.Atoi(as[1])
+}
+
+func (s *Server) GetServer() string {
+	return s.addr
+}
+
+func (s *Server) IsConnected() bool {
+	return s.IsConnected()
 }
 
 // Connect to picow device socket, uses "tcp"
 func (s *Server) Connect() error {
-	addr := fmt.Sprintf("%s:%d", s.host, s.port)
-	c, err := net.Dial("tcp", addr)
+	c, err := net.Dial("tcp", s.addr)
 	if err != nil {
 		return err
 	}
 
-	s.addr = addr
 	s.conn = c
+	s.isConected = true
 
 	return nil
 }
@@ -107,7 +121,7 @@ func (s *Server) Connect() error {
 // GetResponse from the picow device
 func (s *Server) GetResponse() (*Response, error) {
 	// check connection to the picow device
-	if s.addr == "" {
+	if !s.isConected {
 		return nil, fmt.Errorf("not connected to server, run connect method first")
 	}
 
@@ -151,7 +165,7 @@ func (s *Server) GetResponse() (*Response, error) {
 // Send a request to the picow
 func (s *Server) Send(req Request) error {
 	// check connection to picow device
-	if s.addr == "" {
+	if !s.isConected {
 		return fmt.Errorf("not connected to server, run connect method first")
 	}
 
