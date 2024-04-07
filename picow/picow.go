@@ -70,9 +70,9 @@ type Response struct {
 
 // Server will handle all communication to a picow device
 type Server struct {
-	addr       string
-	conn       net.Conn
-	isConected bool
+	addr        string
+	conn        net.Conn
+	isConnected bool
 }
 
 // NewServer will create a new Server object
@@ -107,7 +107,7 @@ func (s *Server) GetAddr() string {
 
 // Checks if the connection to the server is still up
 func (s *Server) IsConnected() bool {
-	return s.IsConnected()
+	return s.isConnected
 }
 
 // Connect to picow device socket, uses "tcp"
@@ -118,7 +118,7 @@ func (s *Server) Connect() error {
 	}
 
 	s.conn = c
-	s.isConected = true
+	s.isConnected = true
 
 	return nil
 }
@@ -126,7 +126,7 @@ func (s *Server) Connect() error {
 // GetResponse from the picow device
 func (s *Server) GetResponse() (*Response, error) {
 	// check connection to the picow device
-	if !s.isConected {
+	if !s.isConnected {
 		return nil, fmt.Errorf("not connected to server, run connect method first")
 	}
 
@@ -170,7 +170,7 @@ func (s *Server) GetResponse() (*Response, error) {
 // Send a request to the picow
 func (s *Server) Send(req *Request) error {
 	// check connection to picow device
-	if !s.isConected {
+	if !s.isConnected {
 		return fmt.Errorf("not connected to server, run connect method first")
 	}
 

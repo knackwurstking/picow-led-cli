@@ -21,7 +21,7 @@ type SubCMD string
 type FlagsSubCMDRun struct {
 	ID          int      // ID changes the default command id (the motion id is not allowed)
 	Args        []string // Args containing all commandline args besides these already parsed
-	PrettyPrint bool     // PrettyPrint enables intentation for resopnse data
+	PrettyPrint bool     // PrettyPrint enables indentation for response data
 }
 
 // FlagsOn subcommand flags
