@@ -74,8 +74,17 @@ func OnEvent(addr Addr, flags *FlagsSubCMDOn) *sync.WaitGroup {
 	wg := sync.WaitGroup{}
 	defer wg.Done()
 
-	// TODO: get request object from `flags.Event`
-	// ...
+	if flags.StartMotion {
+		request := &picow.Request{
+			ID:      int(picow.IDNoResponse),
+			Group:   picow.GroupMotion,
+			Type:    picow.TypeEvent,
+			Command: "start",
+			Args:    make([]string, 0),
+		}
+
+		// TODO: send request to server and continue
+	}
 
 	// TODO: check if -start-motion flags is set, run command `motion event start` first if true
 	// ...
