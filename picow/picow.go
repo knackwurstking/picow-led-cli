@@ -97,10 +97,12 @@ func (s *Server) GetPort() (int, error) {
 	return strconv.Atoi(as[1])
 }
 
-func (s *Server) GetServer() string {
+// GetAddr returns the <host>:<port>
+func (s *Server) GetAddr() string {
 	return s.addr
 }
 
+// Checks if the connection to the server is still up
 func (s *Server) IsConnected() bool {
 	return s.IsConnected()
 }
