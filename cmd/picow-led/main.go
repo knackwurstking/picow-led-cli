@@ -1,16 +1,7 @@
 package main
 
-/*
-NOTE:
-  - Creates a direct connection to a picow device per default
-  - A server address can be set to communicate with the main
-    server instead with the picow device(s)
-  - Wait for motion and (optional) run a command
-  - run a command (or run multiple commands at once)
-  - always expect json data as a return, as long the request id is not set to "-1"
-*/
-
 import (
+	"encoding/json"
 	"os"
 	"sync"
 
@@ -25,6 +16,8 @@ const (
 	ErrorArgs = 2
 	// ErrorInternal - something went wrong, this is a dev problem :)
 	ErrorInternal = 10
+	// ErrorServerError - something went wrong on the server side
+	ErrorServerError = 15
 	// ErrorUnderConstruction - feature not ready yet
 	ErrorUnderConstruction = 100
 )
@@ -37,7 +30,7 @@ func main() {
 	}
 
 	log.EnableDebug = flags.Debug
-	log.Debugf("%+v\n", flags)
+	log.Debugf("flags=%+v\n", flags)
 
 	for _, subArgs := range subsArgs {
 		// parse args for sub
@@ -47,19 +40,103 @@ func main() {
 			if err != nil {
 				log.Fatalf(ErrorArgs, "Parse \"%s\" args failed: %s", subArgs[0], err.Error())
 			}
-			runCommand(flags.Addr, subFlags, getRequestFromArgs(subFlags.Args))
+			RunCommand(flags.Addr, subFlags, getRequestFromArgs(subFlags.Args))
 		case SubCMDOn:
 			subFlags, err := flags.ReadSubCMDOn(subArgs[1:])
 			if err != nil {
 				log.Fatalf(ErrorArgs, "Parse \"%s\" args failed: %s", subArgs[0], err.Error())
 			}
-			onEvent(flags.Addr, subFlags)
+			OnEvent(flags.Addr, subFlags)
 		default:
 			log.Fatalf(ErrorArgs, "Ooops, subcommand \"%s\" not found!", subArgs[0])
 		}
 	}
 
 	os.Exit(ErrorUnderConstruction)
+}
+
+func RunCommand(addr Addr, flags *FlagsSubCMDRun, request *picow.Request) *sync.WaitGroup {
+	wg := sync.WaitGroup{}
+	defer wg.Done()
+
+	request.ID = flags.ID
+	for _, pico := range addr {
+		log.Debugf("run command for \"%s\"", pico)
+
+		wg.Add(1)
+		go sendRequest(pico, request, flags.PrettyPrint, &wg)
+	}
+
+	return &wg
+}
+
+func OnEvent(addr Addr, flags *FlagsSubCMDOn) *sync.WaitGroup {
+	wg := sync.WaitGroup{}
+	defer wg.Done()
+
+	// TODO: get request object from `flags.Event`
+	// ...
+
+	// TODO: check if -start-motion flags is set, run command `motion event start` first if true
+	// ...
+
+	// TODO: run command: start event, check response for error
+	// TODO: and wait for event before return
+	// ...
+
+	os.Exit(ErrorUnderConstruction)
+	return &wg
+}
+
+func sendRequest(pico string, request *picow.Request, prettyResponse bool, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	server := picow.NewServer(pico)
+	if err := server.Connect(); err != nil {
+		log.Errorf("Connecting to \"%s\" failed: %s", server.GetAddr(), err.Error())
+		return
+	}
+
+	err := server.Send(request)
+	if err != nil {
+		log.Errorf("Send request to \"%s\" failed: %s", server.GetAddr(), err.Error())
+		return
+	}
+
+	if request.ID == int(picow.IDNoResponse) {
+		return
+	}
+
+	resp, err := server.GetResponse()
+	if err != nil {
+		log.Errorf("Get response from \"%s\" failed: %s", server.GetAddr(), err.Error())
+		return
+	}
+
+	if resp.Error != "" {
+		if resp.ID != 0 {
+			log.Errorf("ID %d: %s: %s", resp.ID, server.GetAddr(), resp.Error)
+		} else {
+			log.Errorf("%s: %s", server.GetAddr(), resp.ID, resp.Error)
+		}
+		return
+	}
+
+	if resp.Data != nil {
+		var data []byte
+		var err error
+		if prettyResponse {
+			data, err = json.MarshalIndent(resp.Data, "", "    ")
+		} else {
+			data, err = json.Marshal(resp.Data)
+		}
+		if err != nil {
+			log.Debugf("resp.Data=%+v", resp.Data)
+			log.Fatalf(ErrorServerError, "Invalid json data from server \"%s\"", server.GetAddr())
+		}
+
+		log.Log("%s", string(data))
+	}
 }
 
 func getRequestFromArgs(args []string) (req *picow.Request) {
@@ -98,27 +175,4 @@ func getRequestFromArgs(args []string) (req *picow.Request) {
 	}
 
 	return req
-}
-
-func runCommand(addr Addr, subArgs *FlagsSubCMDRun, request *picow.Request) *sync.WaitGroup {
-	wg := sync.WaitGroup{}
-	defer wg.Done()
-	// TODO: run command / send request to server and print out the response
-
-	os.Exit(ErrorUnderConstruction)
-
-	return &wg
-}
-
-func onEvent(addr Addr, subArgs *FlagsSubCMDOn) *sync.WaitGroup {
-	wg := sync.WaitGroup{}
-	defer wg.Done()
-	// TODO: get request object from flags
-
-	// TODO: run command: start event, check response for error
-	// TODO: and wait for event before return
-
-	os.Exit(ErrorUnderConstruction)
-
-	return &wg
 }

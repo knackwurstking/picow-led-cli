@@ -8,6 +8,7 @@ import (
 var (
 	EnableDebug = false
 	PrefixDebug = "debug: "
+	PrefixLog   = ""
 	PrefixError = "error: "
 	PrefixFatal = "error: "
 )
@@ -19,6 +20,10 @@ func Debugf(format string, a ...any) {
 	}
 
 	_, _ = fmt.Fprintf(os.Stderr, PrefixDebug+format, a...)
+}
+
+func Log(format string, a ...any) {
+	_, _ = fmt.Fprintf(os.Stdout, PrefixLog+format, a...)
 }
 
 // Error will just print out an error with prefix

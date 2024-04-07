@@ -19,14 +19,15 @@ type SubCMD string
 
 // FlagsRun subcommand flags
 type FlagsSubCMDRun struct {
-	ID   int      // ID changes the default command id (the motion id is not allowed)
-	Args []string // Args containing all commandline args besides these already parsed
+	ID          int      // ID changes the default command id (the motion id is not allowed)
+	Args        []string // Args containing all commandline args besides these already parsed
+	PrettyPrint bool     // PrettyPrint enables intentation for resopnse data
 }
 
 // FlagsOn subcommand flags
 type FlagsSubCMDOn struct {
-	StartMotion bool     // StartMotion auto start motion sensor if set to true
-	Args        []string // Args containing all commandline args besides these already parsed
+	StartMotion bool   // StartMotion auto start motion sensor if set to true
+	Event       string // Event to start, or wait for ("motion")
 }
 
 // Addr contains strings "<ip/hostname>:<port>" for the picow devices to connect to
@@ -96,6 +97,7 @@ func (*Flags) ReadSubCMDRun(args []string) (*FlagsSubCMDRun, error) {
 	runFlags := &FlagsSubCMDRun{}
 
 	cmd.IntVar(&runFlags.ID, "id", runFlags.ID, "changes the default id in use")
+	cmd.BoolVar(&runFlags.PrettyPrint, "pretty-print", runFlags.PrettyPrint, "pretty prints response data")
 
 	err := cmd.Parse(args)
 	runFlags.Args = cmd.Args()
@@ -113,6 +115,9 @@ func (*Flags) ReadSubCMDOn(args []string) (*FlagsSubCMDOn, error) {
 	cmd.BoolVar(&onFlags.StartMotion, "start-motion", onFlags.StartMotion, "start motion sensor handling on the pico")
 
 	err := cmd.Parse(args)
+
+	// TODO: check args for <event>
 	onFlags.Args = cmd.Args()
+
 	return onFlags, err
 }

@@ -161,11 +161,11 @@ func (s *Server) GetResponse() (*Response, error) {
 		return nil, err
 	}
 
-	return &Response{}, nil
+	return &resp, nil
 }
 
 // Send a request to the picow
-func (s *Server) Send(req Request) error {
+func (s *Server) Send(req *Request) error {
 	// check connection to picow device
 	if !s.isConected {
 		return fmt.Errorf("not connected to server, run connect method first")
