@@ -38,6 +38,9 @@ var (
 		TypeGet,
 		TypeEvent,
 	}
+	Events = []string{
+		"motion",
+	}
 )
 
 // Group of command
