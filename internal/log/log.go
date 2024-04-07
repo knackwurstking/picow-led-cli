@@ -7,8 +7,9 @@ import (
 
 var (
 	EnableDebug = false
-	PrefixError = "err: "
-	PrefixFatal = "err: "
+	PrefixDebug = "debug: "
+	PrefixError = "error: "
+	PrefixFatal = "error: "
 )
 
 // Debug will print a debug message if `EnableDebug` is set to true
@@ -17,7 +18,7 @@ func Debugf(format string, a ...any) {
 		return
 	}
 
-	_, _ = fmt.Fprintf(os.Stderr, format, a...)
+	_, _ = fmt.Fprintf(os.Stderr, PrefixDebug+format, a...)
 }
 
 // Error will just print out an error with prefix
