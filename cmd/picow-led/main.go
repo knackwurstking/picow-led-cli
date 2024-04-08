@@ -24,7 +24,7 @@ const (
 )
 
 var (
-	serverCache = make([]*picow.Server, 0)
+	serverCache = &ServerCache{}
 )
 
 func main() {
@@ -37,6 +37,7 @@ func main() {
 	log.EnableDebug = flags.Debug
 	log.Debugf("flags=%+v\n", flags)
 
+	// TODO: check flags for `-loop`
 	for _, subArgs := range subsArgs {
 		// parse args for sub
 		switch SubCMD(subArgs[0]) {
@@ -72,9 +73,13 @@ func RunCommand(addr Addr, flags *FlagsSubCMDRun, request *picow.Request) *sync.
 		func(a string, wg *sync.WaitGroup) {
 			defer wg.Done()
 
-			// TODO: handle connection to server and pass to handleRequest call
-			// TODO: get server from the serverCache, or create new
-			if err := handleRequest(a, request, flags.PrettyPrint); err != nil {
+			server, err := serverCache.Get(a)
+			if err != nil {
+				log.Errorf("Server connection for \"%s\" failed: %s", server.GetAddr(), err.Error())
+				return
+			}
+
+			if err := handleRequest(server, request, flags.PrettyPrint); err != nil {
 				log.Errorf("handle request to \"%s\" failed: %s", a, err.Error())
 			}
 		}(a, &wg)
@@ -87,7 +92,7 @@ func OnEvent(addr Addr, flags *FlagsSubCMDOn) {
 	wg := sync.WaitGroup{}
 
 	if flags.StartMotion {
-		// TODO: Only start once? (in case of -loop is set, see main function)
+		// FIXME: Only start once? (in case of -loop is set)
 		request := &picow.Request{
 			ID:      int(picow.IDNoResponse),
 			Group:   picow.GroupMotion,
@@ -101,9 +106,13 @@ func OnEvent(addr Addr, flags *FlagsSubCMDOn) {
 			go func(a string, wg *sync.WaitGroup) {
 				defer wg.Done()
 
-				// TODO: handle connection to server and pass to handleRequest call
-				// TODO: get server from the serverCache, or create new
-				if err := handleRequest(a, request, false); err != nil {
+				server, err := serverCache.Get(a)
+				if err != nil {
+					log.Errorf("Server connection for \"%s\" failed: %s", server.GetAddr(), err.Error())
+					return
+				}
+
+				if err := handleRequest(server, request, false); err != nil {
 					log.Errorf("handle request to \"%s\" failed: %s", a, err.Error())
 				}
 			}(a, &wg)
@@ -119,10 +128,10 @@ func OnEvent(addr Addr, flags *FlagsSubCMDOn) {
 
 func handleRequest(server *picow.Server, request *picow.Request, prettyResponse bool) error {
 	// TODO: this could be a problem, i'm not closing existing connections so there is no need to reconnect every time
-	server := picow.NewServer(addr)
-	if err := server.Connect(); err != nil {
-		return fmt.Errorf("connection failed: %s", err.Error())
-	}
+	//server := picow.NewServer(addr)
+	//if err := server.Connect(); err != nil {
+	//	return fmt.Errorf("connection failed: %s", err.Error())
+	//}
 
 	err := server.Send(request)
 	if err != nil {
