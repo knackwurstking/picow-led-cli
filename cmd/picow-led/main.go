@@ -45,12 +45,12 @@ func main() {
 	os.Exit(ErrorUnderConstruction)
 }
 
-func RunCommand(addr Addr, flags *FlagsSubCMDRun, request *picow.Request) *sync.WaitGroup {
+func RunCommand(addrList AddrList, flags *FlagsSubCMDRun, request *picow.Request) *sync.WaitGroup {
 	wg := sync.WaitGroup{}
 	defer wg.Done()
 
 	request.ID = flags.ID
-	for _, a := range addr {
+	for _, a := range addrList {
 		log.Debugf("run command for \"%s\"", a)
 
 		wg.Add(1)
@@ -72,7 +72,7 @@ func RunCommand(addr Addr, flags *FlagsSubCMDRun, request *picow.Request) *sync.
 	return &wg
 }
 
-func OnEvent(addr Addr, flags *FlagsSubCMDOn) {
+func OnEvent(addrList AddrList, flags *FlagsSubCMDOn) {
 	wg := sync.WaitGroup{}
 
 	if flags.StartMotion && !motionStarted {
@@ -84,7 +84,7 @@ func OnEvent(addr Addr, flags *FlagsSubCMDOn) {
 			Args:    make([]string, 0),
 		}
 
-		for _, a := range addr {
+		for _, a := range addrList {
 			wg.Add(1)
 			go func(a string, wg *sync.WaitGroup) {
 				defer wg.Done()
@@ -105,8 +105,30 @@ func OnEvent(addr Addr, flags *FlagsSubCMDOn) {
 		motionStarted = true
 	}
 
-	// TODO: wait for a motion event, than return (no goroutine, blocking)
-	// ...
+	for _, a := range addrList {
+		server, err := serverCache.Get(a)
+		if err != nil {
+			log.Errorf("Server connection for \"%s\" failed: %s", server.GetAddr(), err.Error())
+			return
+		}
+
+		var resp *picow.Response
+		for {
+			resp, err = server.GetResponse()
+			if err != nil {
+				return
+			}
+
+			if picow.ID(resp.ID) == picow.IDMotionEvent {
+				break
+			}
+		}
+
+		if resp.Error != "" {
+			// NOTE: errors ignored per default
+			log.Errorf("motion sensor error on \"%s\": %s", server.GetAddr(), resp.Error)
+		}
+	}
 
 	os.Exit(ErrorUnderConstruction)
 	wg.Wait()

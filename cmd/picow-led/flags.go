@@ -30,16 +30,16 @@ type FlagsSubCMDOn struct {
 	Event       string // Event to start, or wait for ("motion")
 }
 
-// Addr contains strings "<ip/hostname>:<port>" for the picow devices to connect to
-type Addr []string
+// AddrList contains strings "<ip/hostname>:<port>" for the picow devices to connect to
+type AddrList []string
 
 // String returns a string with all addresses
-func (a Addr) String() string {
+func (a AddrList) String() string {
 	return strings.Join(a, ",")
 }
 
 // Set adds a new server
-func (a *Addr) Set(value string) error {
+func (a *AddrList) Set(value string) error {
 	matched, _ := regexp.MatchString("^.+:[0-9]+$", value)
 	if !matched {
 		// no match means we have to add the default port here
@@ -53,7 +53,7 @@ func (a *Addr) Set(value string) error {
 
 // Flags holds all flag values
 type Flags struct {
-	Addr  Addr     // Addr containing the picow server addresses
+	Addr  AddrList // Addr containing the picow server addresses
 	Debug bool     // Debug enables debugging messages
 	Args  []string // Args containing all commandline args besides these already parsed
 	Loop  bool     // Loop enables looping of all sub commands in order
