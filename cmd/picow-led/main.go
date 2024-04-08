@@ -24,38 +24,22 @@ const (
 )
 
 var (
-	serverCache = &ServerCache{}
+	serverCache   = &ServerCache{}
+	motionStarted = false
 )
 
 func main() {
 	flags := NewFlags()
-	subsArgs, err := flags.Read().SplitSubs()
-	if err != nil {
-		log.Fatalf(ErrorArgs, "Pasrsing flags failed: %s", err)
-	}
 
 	log.EnableDebug = flags.Debug
 	log.Debugf("flags=%+v\n", flags)
 
-	// TODO: check flags for `-loop`
-	for _, subArgs := range subsArgs {
-		// parse args for sub
-		switch SubCMD(subArgs[0]) {
-		case SubCMDRun:
-			subFlags, err := flags.ReadSubCMDRun(subArgs[1:])
-			if err != nil {
-				log.Fatalf(ErrorArgs, "Parse \"%s\" args failed: %s", subArgs[0], err.Error())
-			}
-			RunCommand(flags.Addr, subFlags, getRequestFromArgs(subFlags.Args))
-		case SubCMDOn:
-			subFlags, err := flags.ReadSubCMDOn(subArgs[1:])
-			if err != nil {
-				log.Fatalf(ErrorArgs, "Parse \"%s\" args failed: %s", subArgs[0], err.Error())
-			}
-			OnEvent(flags.Addr, subFlags)
-		default:
-			log.Fatalf(ErrorArgs, "Ooops, subcommand \"%s\" not found!", subArgs[0])
+	if flags.Loop {
+		for {
+			handleSubCommands(flags)
 		}
+	} else {
+		handleSubCommands(flags)
 	}
 
 	os.Exit(ErrorUnderConstruction)
@@ -91,8 +75,7 @@ func RunCommand(addr Addr, flags *FlagsSubCMDRun, request *picow.Request) *sync.
 func OnEvent(addr Addr, flags *FlagsSubCMDOn) {
 	wg := sync.WaitGroup{}
 
-	if flags.StartMotion {
-		// FIXME: Only start once? (in case of -loop is set)
+	if flags.StartMotion && !motionStarted {
 		request := &picow.Request{
 			ID:      int(picow.IDNoResponse),
 			Group:   picow.GroupMotion,
@@ -113,10 +96,13 @@ func OnEvent(addr Addr, flags *FlagsSubCMDOn) {
 				}
 
 				if err := handleRequest(server, request, false); err != nil {
-					log.Errorf("handle request to \"%s\" failed: %s", a, err.Error())
+					log.Errorf("Handle request to \"%s\" failed: %s", a, err.Error())
 				}
 			}(a, &wg)
 		}
+
+		// NOTE: errors ignored per default
+		motionStarted = true
 	}
 
 	// TODO: wait for a motion event, than return (no goroutine, blocking)
@@ -126,13 +112,34 @@ func OnEvent(addr Addr, flags *FlagsSubCMDOn) {
 	wg.Wait()
 }
 
-func handleRequest(server *picow.Server, request *picow.Request, prettyResponse bool) error {
-	// TODO: this could be a problem, i'm not closing existing connections so there is no need to reconnect every time
-	//server := picow.NewServer(addr)
-	//if err := server.Connect(); err != nil {
-	//	return fmt.Errorf("connection failed: %s", err.Error())
-	//}
+func handleSubCommands(flags *Flags) {
+	subs, err := flags.Read().SplitSubs()
+	if err != nil {
+		log.Fatalf(ErrorArgs, "Pasrsing flags failed: %s", err)
+	}
 
+	for _, sub := range subs {
+		// parse args for sub
+		switch SubCMD(sub[0]) {
+		case SubCMDRun:
+			subFlags, err := flags.ReadSubCMDRun(sub[1:])
+			if err != nil {
+				log.Fatalf(ErrorArgs, "Parse \"%s\" args failed: %s", sub[0], err.Error())
+			}
+			RunCommand(flags.Addr, subFlags, getRequestFromArgs(subFlags.Args))
+		case SubCMDOn:
+			subFlags, err := flags.ReadSubCMDOn(sub[1:])
+			if err != nil {
+				log.Fatalf(ErrorArgs, "Parse \"%s\" args failed: %s", sub[0], err.Error())
+			}
+			OnEvent(flags.Addr, subFlags)
+		default:
+			log.Fatalf(ErrorArgs, "Ooops, subcommand \"%s\" not found!", sub[0])
+		}
+	}
+}
+
+func handleRequest(server *picow.Server, request *picow.Request, prettyResponse bool) error {
 	err := server.Send(request)
 	if err != nil {
 		return fmt.Errorf("request failed: %s", err.Error())

@@ -56,6 +56,7 @@ type Flags struct {
 	Addr  Addr     // Addr containing the picow server addresses
 	Debug bool     // Debug enables debugging messages
 	Args  []string // Args containing all commandline args besides these already parsed
+	Loop  bool     // Loop enables looping of all sub commands in order
 }
 
 func NewFlags() *Flags {
@@ -68,7 +69,7 @@ func NewFlags() *Flags {
 func (flags *Flags) Read() *Flags {
 	flag.Var(&flags.Addr, "addr", "picow device address (ip[:port] or hostname[:port])")
 	flag.BoolVar(&flags.Debug, "debug", flags.Debug, "enable debug messages")
-	// TODO: Add flag for loop all given commands `-loop`
+	flag.BoolVar(&flags.Loop, "loop", flags.Loop, "enable looping of commands (in order)")
 
 	flag.Parse()
 	flags.Args = flag.Args()

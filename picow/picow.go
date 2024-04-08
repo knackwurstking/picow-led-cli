@@ -77,7 +77,6 @@ type Server struct {
 
 // NewServer will create a new Server object
 func NewServer(addr string) *Server {
-	// TODO: adding a side effect and store not closed connections globally?
 	return &Server{
 		addr: addr,
 	}
